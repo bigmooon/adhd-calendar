@@ -1,0 +1,7 @@
+{
+  "tool_name": "mcp__plugin_everything-claude-code_playwright__browser_resize",
+  "tool_input_preview": "{\"width\":1440,\"height\":900}",
+  "error": "### Error\nError: Extension connection timeout. Make sure the \"Playwright MCP Bridge\" extension is installed. See https://github.com/microsoft/playwright-mcp/blob/main/packages/extension/README.md for installation instructions.",
+  "timestamp": "2026-07-05T06:12:13.919Z",
+  "retry_count": 1
+}

@@ -1,0 +1,71 @@
+{
+  "config": {
+    "owner": "bigmooon",
+    "categories": {
+      "coding_test": {
+        "label": "코딩테스트",
+        "xp_per_commit": 10,
+        "repos": [
+          "algo-study-notebooks",
+          "LeetCode",
+          "coding-test"
+        ]
+      },
+      "cs_study": {
+        "label": "CS/학습",
+        "xp_per_commit": 0,
+        "repos": [
+          "llm_eval",
+          "llm-practice",
+          "llm-study",
+          "llm_agents",
+          "nlp-practice",
+          "chatbot",
+          "love-imbalance-detector",
+          "sangnyanghan-yangachi",
+          "pangyo-minutes",
+          "nodejs-practice",
+          "typescript-practice",
+          "python-template"
+        ]
+      },
+      "project": {
+        "label": "프로젝트",
+        "xp_per_commit": 0,
+        "repos": [
+          "django_qna_project",
+          "shift",
+          "portfolio",
+          "Festival-pub",
+          "contract-secretary",
+          "bigmooon.github.io",
+          "blaybus-frontend",
+          "piyak-hackathon",
+          "chat-app",
+          "clone-apple-gsap-threejs",
+          "QuantEz-FE",
+          "QuantEZ",
+          "practice",
+          "nextJS",
+          "eslint-prettier-configs",
+          "adhd-calendar"
+        ]
+      },
+      "resume": {
+        "label": "이력서 작성",
+        "xp_per_commit": 0,
+        "local_paths": [
+          "/Users/jpaper/Documents/job_prep"
+        ]
+      }
+    }
+  },
+  "last_check": "2026-07-04T13:05:25.166583+00:00",
+  "xp": 0,
+  "streak": {
+    "current": 0,
+    "longest": 0,
+    "last_date": null
+  },
+  "history": []
+}

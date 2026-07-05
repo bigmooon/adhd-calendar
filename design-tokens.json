@@ -1,0 +1,53 @@
+{
+  "meta": {
+    "name": "몰입캘린더 Design Tokens",
+    "motif": "dreamy pixel pastel (몽환 파스텔 픽셀아트)",
+    "version": "0.2.0"
+  },
+  "color": {
+    "sky": ["#9d9aec", "#c3aef0", "#f0c6e4", "#aebef1"],
+    "panel": { "base": "rgba(253,251,255,0.94)", "solid": "#fdfbff", "alt": "#f4eefc" },
+    "line": { "base": "#ddd0f2", "strong": "#c9b8ea" },
+    "ink": { "primary": "#4a4177", "secondary": "#7c72a8", "tertiary": "#a89fce" },
+    "accent": { "base": "#8b7cf6", "deep": "#6f5fe0", "subtle": "#ece7fd" },
+    "star": "#ffd966",
+    "state": {
+      "alert": { "bg": "#fff0f3", "line": "#f6b8c8" },
+      "ai": { "bg": "#f3edff", "line": "#cdb8f8" },
+      "ok": { "bg": "#eafaf0", "line": "#a9e6bd" }
+    },
+    "category": {
+      "coding": "#8fbef5",
+      "cs": "#b9a8f2",
+      "project": "#a9e6bd",
+      "resume": "#f9afc9",
+      "routine": "#f9a3a3",
+      "ai": "#cdb8f8",
+      "etc": "#d9d5e6"
+    },
+    "empty": "#efecf6"
+  },
+  "font": {
+    "family": {
+      "body": "'Galmuri11', 'DungGeunMo', sans-serif",
+      "display": "'DungGeunMo', 'Galmuri11', sans-serif"
+    },
+    "source": {
+      "galmuri": "https://cdn.jsdelivr.net/gh/quiple/galmuri@latest/dist/galmuri.css",
+      "dunggeunmo": "https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/DungGeunMo.woff"
+    },
+    "size": { "xs": "11px", "sm": "12px", "base": "13px", "lg": "15px", "xl": "16px", "2xl": "24px", "display": "clamp(36px, 5vw, 56px)" }
+  },
+  "space": { "1": "4px", "2": "8px", "3": "12px", "4": "16px", "5": "20px", "6": "24px" },
+  "radius": { "sm": "8px", "md": "10px", "lg": "12px", "xl": "14px", "full": "999px" },
+  "border": { "panel": "2px solid", "detail": "1.5px solid" },
+  "shadow": {
+    "panel": "0 4px 0 rgba(111,95,224,0.10), 0 10px 28px rgba(111,95,224,0.16)",
+    "buttonOffset": "0 3px 0 <accent-deep>"
+  },
+  "motion": {
+    "twinkle": "3.2s ease-in-out infinite (배경 별 전용)",
+    "floaty": "6s ease-in-out infinite (달 전용)",
+    "ui": "0.15-0.2s ease-out, prefers-reduced-motion 시 배경 애니메이션 제거"
+  }
+}

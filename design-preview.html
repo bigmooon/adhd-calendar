@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>몰입캘린더 — ADHD 개발자를 위한 캘린더 + 10분 트래커</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri@latest/dist/galmuri.css" />
+<style>
+  @font-face {
+    font-family: 'DungGeunMo';
+    src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_2105_2@1.0/DungGeunMo.woff') format('woff');
+    font-display: swap;
+  }
+
+  :root {
+    /* 하늘 */
+    --sky1: #9d9aec; --sky2: #c3aef0; --sky3: #f0c6e4; --sky4: #aebef1;
+    /* 서피스 */
+    --panel: rgba(253, 251, 255, 0.94);
+    --panel-solid: #fdfbff;
+    --panel-alt: #f4eefc;
+    --line: #ddd0f2;
+    --line-strong: #c9b8ea;
+    /* 텍스트 */
+    --ink: #4a4177;
+    --ink-2: #7c72a8;
+    --ink-3: #a89fce;
+    /* 액센트 */
+    --accent: #8b7cf6;
+    --accent-deep: #6f5fe0;
+    --accent-subtle: #ece7fd;
+    --star: #ffd966;
+    /* 카테고리 */
+    --c-coding: #8fbef5;
+    --c-cs: #b9a8f2;
+    --c-project: #a9e6bd;
+    --c-resume: #f9afc9;
+    --c-routine: #f9a3a3;
+    --c-ai: #cdb8f8;
+    --c-etc: #e6e3ee;
+    /* 상태 */
+    --alert-bg: #fff0f3; --alert-line: #f6b8c8;
+    --ai-bg: #f3edff; --ai-line: #cdb8f8;
+    --ok-bg: #eafaf0; --ok-line: #a9e6bd;
+
+    --shadow: 0 4px 0 rgba(111, 95, 224, 0.10), 0 10px 28px rgba(111, 95, 224, 0.16);
+    --r: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Galmuri11', 'DungGeunMo', sans-serif;
+    color: var(--ink);
+    background:
+      radial-gradient(1100px 500px at 85% 108%, rgba(255, 214, 240, .55), transparent 60%),
+      radial-gradient(900px 420px at 8% 112%, rgba(255, 219, 242, .5), transparent 60%),
+      linear-gradient(178deg, var(--sky1) 0%, var(--sky2) 38%, var(--sky3) 74%, var(--sky4) 100%);
+    min-height: 100vh;
+    overflow-x: hidden;
+    padding: 28px clamp(14px, 3vw, 44px) 40px;
+    position: relative;
+  }
+
+  /* ── 하늘 데코 ─────────────────────────── */
+  #sky { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .star { position: absolute; color: #fff; text-shadow: 0 0 6px rgba(255,255,255,.9); animation: twinkle 3.2s ease-in-out infinite; }
+  .cloud { position: absolute; background: rgba(255,255,255,.5); filter: blur(22px); border-radius: 999px; }
+  .moon {
+    position: absolute; top: 22px; left: 3vw; font-size: 84px; line-height: 1;
+    filter: drop-shadow(0 0 22px rgba(255, 233, 168, .8));
+    animation: floaty 6s ease-in-out infinite;
+  }
+  .shooting {
+    position: absolute; top: 60px; right: 6vw; width: 130px; height: 3px;
+    background: linear-gradient(90deg, transparent, #fff);
+    transform: rotate(-18deg); border-radius: 3px; opacity: .85;
+  }
+  .shooting::after { content: '✦'; position: absolute; right: -8px; top: -9px; color: var(--star); font-size: 18px; }
+  @keyframes twinkle { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
+  @keyframes floaty { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+  @media (prefers-reduced-motion: reduce) { .star, .moon { animation: none; } }
+
+  main { position: relative; z-index: 1; max-width: 1500px; margin: 0 auto; }
+
+  /* ── 헤더 ─────────────────────────────── */
+  .hero { text-align: center; margin-bottom: 26px; }
+  .hero h1 {
+    font-family: 'DungGeunMo', 'Galmuri11', sans-serif;
+    font-size: clamp(40px, 6vw, 68px);
+    color: #fff;
+    letter-spacing: 2px;
+    text-shadow:
+      3px 3px 0 var(--accent-deep),
+      6px 6px 0 rgba(111, 95, 224, .35),
+      0 0 30px rgba(255, 255, 255, .5);
+  }
+  .hero h1 .deco { font-size: .7em; vertical-align: middle; text-shadow: none; }
+  .hero .tagline {
+    display: inline-block; margin-top: 14px;
+    background: rgba(255,255,255,.82); border: 2px solid var(--line-strong);
+    border-radius: 999px; padding: 7px 20px;
+    font-size: 14px; color: var(--ink);
+    box-shadow: 0 3px 0 rgba(111,95,224,.12);
+  }
+  .hero .sub {
+    display: block; width: fit-content; margin: 10px auto 0;
+    background: var(--accent); color: #fff;
+    border-radius: 999px; padding: 6px 22px; font-size: 13px;
+    box-shadow: 0 3px 0 var(--accent-deep);
+  }
+
+  /* ── 패널 공통 ─────────────────────────── */
+  .panel {
+    background: var(--panel); border: 2px solid var(--line-strong);
+    border-radius: var(--r); box-shadow: var(--shadow);
+  }
+  .panel-head {
+    display: flex; align-items: center; gap: 8px;
+    padding: 14px 16px 10px; font-size: 15px; font-weight: 700;
+  }
+  .panel-head .spacer { flex: 1; }
+  .qmark {
+    width: 22px; height: 22px; border: 2px solid var(--line); border-radius: 50%;
+    display: grid; place-items: center; font-size: 12px; color: var(--ink-3);
+  }
+
+  /* ── 레이아웃 ─────────────────────────── */
+  .row-top { display: grid; grid-template-columns: minmax(0, 2.15fr) minmax(300px, .9fr); gap: 22px; align-items: start; }
+  .row-bottom { display: grid; grid-template-columns: 1.45fr 1.15fr .78fr .62fr; gap: 22px; align-items: start; margin-top: 22px; }
+  @media (max-width: 1280px) {
+    .row-top, .row-bottom { grid-template-columns: 1fr; }
+    .phone-wrap { justify-content: center; }
+  }
+
+  /* ── 메인 윈도우 ───────────────────────── */
+  .window { overflow: hidden; }
+  .titlebar { display: flex; gap: 7px; padding: 12px 16px; border-bottom: 2px solid var(--line); background: rgba(255,255,255,.6); }
+  .titlebar i { width: 12px; height: 12px; border-radius: 50%; }
+  .titlebar i:nth-child(1) { background: #ff8a80; }
+  .titlebar i:nth-child(2) { background: #ffd966; }
+  .titlebar i:nth-child(3) { background: #9ae6a8; }
+
+  .window-body { display: grid; grid-template-columns: 210px minmax(0,1fr) 268px; }
+  @media (max-width: 1100px) { .window-body { grid-template-columns: 1fr; } }
+
+  /* 사이드바 */
+  .sidebar { border-right: 2px solid var(--line); padding: 16px 12px; background: rgba(248,244,255,.6); }
+  .sidebar .logo { display: flex; gap: 8px; align-items: center; font-size: 15px; font-weight: 700; padding: 4px 8px 14px; }
+  .nav a {
+    display: flex; align-items: center; gap: 9px;
+    padding: 8px 10px; border-radius: 9px; font-size: 13px;
+    color: var(--ink-2); text-decoration: none; margin-bottom: 2px;
+  }
+  .nav a.active { background: var(--accent); color: #fff; box-shadow: 0 2px 0 var(--accent-deep); }
+  .nav a:not(.active):hover { background: var(--accent-subtle); }
+  .side-sec { margin-top: 16px; border-top: 2px dashed var(--line); padding-top: 12px; }
+  .side-sec h4 { font-size: 12px; color: var(--ink-2); display: flex; padding: 0 8px 8px; }
+  .side-sec h4 .spacer { flex: 1; }
+  .repo-card {
+    border: 2px solid var(--line); border-radius: 10px; background: #fff;
+    padding: 8px 10px; margin: 0 4px 8px; font-size: 12px;
+  }
+  .repo-card .name { display: flex; gap: 6px; align-items: center; font-weight: 700; margin-bottom: 6px; word-break: break-all; }
+  .chip {
+    display: inline-block; border: 1.5px solid var(--line-strong); border-radius: 999px;
+    padding: 1px 8px; font-size: 11px; color: var(--ink-2); background: var(--panel-alt); margin-right: 4px;
+  }
+  .tag-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--ink-2); padding: 4px 10px; }
+  .dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+
+  /* 캘린더 */
+  .cal { padding: 18px 20px; }
+  .cal-top { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+  .cal-top h2 { font-family: 'DungGeunMo', sans-serif; font-size: 24px; letter-spacing: 1px; }
+  .nav-arrow { border: none; background: none; font-size: 18px; color: var(--ink-2); cursor: pointer; }
+  .btn-today {
+    border: 2px solid var(--accent); color: var(--accent-deep); background: #fff;
+    border-radius: 999px; padding: 3px 14px; font-size: 12px; font-family: inherit; cursor: pointer;
+    box-shadow: 0 2px 0 var(--accent-subtle);
+  }
+  .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); border: 2px solid var(--line); border-radius: 12px; overflow: hidden; background: #fff; }
+  .cal-grid .wd { padding: 8px 0; text-align: center; font-size: 12px; color: var(--ink-2); background: var(--panel-alt); border-bottom: 2px solid var(--line); }
+  .cal-grid .wd.sun { color: #e5738c; }
+  .cell {
+    min-height: 64px; padding: 6px 7px; border-top: 1px solid var(--line);
+    border-left: 1px solid var(--line); font-size: 13px; position: relative;
+  }
+  .cell:nth-child(-n+14) { border-top: none; }
+  .cell:nth-child(7n+1) { border-left: none; }
+  .cell.dim { color: var(--ink-3); background: #fbf9fe; }
+  .cell.sun .d { color: #e5738c; }
+  .cell .d { font-weight: 700; }
+  .cell .star-b { position: absolute; top: 5px; right: 6px; font-size: 11px; }
+  .cell .dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 6px; }
+  .cell .dots i { width: 7px; height: 7px; border-radius: 50%; }
+  .cell.today { background: var(--accent); border-radius: 10px; color: #fff; box-shadow: inset 0 0 0 2px var(--accent-deep); }
+  .cell.today .d { color: #fff; }
+
+  /* 오늘 패널 */
+  .daypane { border-left: 2px solid var(--line); padding: 18px 16px; display: flex; flex-direction: column; gap: 12px; background: rgba(252,250,255,.7); }
+  .daypane h3 { font-size: 16px; display: flex; align-items: center; gap: 7px; }
+  .day-box { border: 2px solid var(--line); border-radius: 12px; background: #fff; padding: 12px; }
+  .day-box h5 { font-size: 12px; color: var(--ink-2); margin-bottom: 8px; }
+  .sched { display: flex; gap: 10px; font-size: 13px; padding: 4px 2px; }
+  .sched time { color: var(--ink-2); font-variant-numeric: tabular-nums; }
+  .routine {
+    display: flex; align-items: center; gap: 8px; font-size: 12.5px;
+    border: 2px solid; border-radius: 10px; padding: 8px 10px; margin-bottom: 7px;
+  }
+  .routine time { margin-left: auto; color: var(--ink-2); }
+  .routine .ck { width: 18px; height: 18px; border-radius: 50%; border: 2px solid; flex: none; display: grid; place-items: center; font-size: 11px; }
+  .routine.r-alert { background: var(--alert-bg); border-color: var(--alert-line); }
+  .routine.r-alert .ck { border-color: var(--alert-line); color: transparent; }
+  .routine.r-ai { background: var(--ai-bg); border-color: var(--ai-line); }
+  .routine.r-ai .ck { border-color: var(--accent); background: var(--accent); color: #fff; }
+  .routine.r-ok { background: var(--ok-bg); border-color: var(--ok-line); }
+  .routine.r-ok .ck { border-color: var(--ok-line); color: transparent; }
+  .sumline { display: flex; align-items: center; gap: 9px; font-size: 13px; padding: 5px 2px; }
+  .sumline b { margin-left: auto; font-size: 15px; }
+  .btn-add {
+    margin-top: auto; align-self: flex-end;
+    background: var(--accent); color: #fff; border: none; font-family: inherit;
+    font-size: 14px; padding: 10px 22px; border-radius: 999px; cursor: pointer;
+    box-shadow: 0 3px 0 var(--accent-deep);
+  }
+  .btn-add:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--accent-deep); }
+
+  /* ── 10분 트래커 ───────────────────────── */
+  .tracker { padding-bottom: 14px; }
+  .tracker .range { font-size: 12px; color: var(--ink-2); padding: 0 16px 8px; }
+  .trk-grid { display: flex; flex-direction: column; gap: 4px; padding: 0 16px; }
+  .trk-row { display: flex; align-items: center; gap: 4px; }
+  .trk-row .h { width: 26px; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .blk { flex: 1; aspect-ratio: 1; max-width: 26px; border-radius: 5px; border: 1.5px solid rgba(74,65,119,.10); }
+  .blk.empty { background: #efecf6; border-color: rgba(74,65,119,.06); }
+  .legend { display: flex; flex-wrap: wrap; gap: 7px 12px; padding: 12px 16px 4px; font-size: 11.5px; color: var(--ink-2); }
+  .legend span { display: flex; align-items: center; gap: 5px; }
+  .legend i { width: 11px; height: 11px; border-radius: 3px; border: 1.5px solid rgba(74,65,119,.12); }
+
+  /* ── 위클리 뷰 ─────────────────────────── */
+  .weekly .wk-head { display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px; font-size: 14px; font-weight: 700; }
+  .wk-cal { display: grid; grid-template-columns: 44px repeat(7, 1fr); padding: 0 14px 8px; font-size: 11px; }
+  .wk-cal .col-h { text-align: center; color: var(--ink-2); padding: 6px 0; border-bottom: 2px solid var(--line); }
+  .wk-times { position: relative; }
+  .wk-times span { position: absolute; right: 6px; transform: translateY(-50%); color: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .wk-col { position: relative; border-left: 1px dashed var(--line); }
+  .wk-body { display: grid; grid-template-columns: 44px repeat(7, 1fr); padding: 0 14px; height: 336px; }
+  .evt {
+    position: absolute; left: 3px; right: 3px; border-radius: 7px;
+    padding: 3px 5px; font-size: 10px; line-height: 1.25; color: var(--ink);
+    border: 1.5px solid rgba(74,65,119,.14); overflow: hidden;
+  }
+  .wk-legend { border-top: 2px dashed var(--line); margin-top: 8px; }
+
+  /* ── 대시보드 ─────────────────────────── */
+  .dash-stats { display: grid; grid-template-columns: 1.2fr 1fr 1fr; gap: 10px; padding: 4px 16px 12px; }
+  .stat { border: 2px solid var(--line); border-radius: 12px; background: #fff; padding: 10px 12px; font-size: 11px; color: var(--ink-2); }
+  .stat b { display: block; font-size: 19px; color: var(--ink); margin-top: 3px; font-variant-numeric: tabular-nums; }
+  .stat small { font-size: 11px; color: var(--ink-3); }
+  .xpbar { display: block; height: 9px; background: var(--panel-alt); border-radius: 999px; margin-top: 8px; overflow: hidden; }
+  .xpbar i { display: block; height: 100%; width: 62%; background: linear-gradient(90deg, var(--accent), #b3a8f8); border-radius: 999px; }
+  .dash-lower { display: grid; grid-template-columns: 1.35fr 1fr; gap: 12px; padding: 0 16px 16px; }
+  .donut-box { border: 2px solid var(--line); border-radius: 12px; background: #fff; padding: 12px; }
+  .donut-box h5 { font-size: 12px; color: var(--ink-2); margin-bottom: 10px; }
+  .donut-flex { display: flex; gap: 14px; align-items: center; }
+  .donut {
+    width: 108px; height: 108px; border-radius: 50%; flex: none;
+    background: conic-gradient(var(--c-coding) 0 28%, var(--c-cs) 28% 54%, var(--c-project) 54% 86%, var(--c-resume) 86% 100%);
+    -webkit-mask: radial-gradient(circle 34px at 50% 50%, transparent 98%, #000 100%);
+            mask: radial-gradient(circle 34px at 50% 50%, transparent 98%, #000 100%);
+  }
+  .donut-lg { font-size: 11.5px; display: flex; flex-direction: column; gap: 7px; color: var(--ink-2); flex: 1; }
+  .donut-lg span { display: flex; align-items: center; gap: 6px; }
+  .donut-lg b { margin-left: auto; color: var(--ink); }
+  .donut-lg i { width: 11px; height: 11px; border-radius: 3px; }
+  .auto-card {
+    border: 2px solid var(--ai-line); border-radius: 12px; background: var(--ai-bg);
+    padding: 12px; font-size: 11.5px; color: var(--ink-2);
+  }
+  .auto-card h5 { font-size: 12.5px; color: var(--ink); line-height: 1.5; margin-bottom: 8px; }
+  .auto-card li { margin: 0 0 5px 16px; }
+  .auto-card .wand { font-size: 22px; display: block; text-align: right; }
+
+  /* ── Claude / 알람 카드 ─────────────────── */
+  .stack { display: flex; flex-direction: column; gap: 18px; }
+  .claude-card { border-color: var(--ai-line); background: linear-gradient(180deg, #f6f1ff, #fdfbff); }
+  .claude-card .panel-head .badge-ai {
+    background: var(--accent); color: #fff; font-size: 10px; border-radius: 6px; padding: 2px 7px;
+  }
+  .claude-card .desc { font-size: 11.5px; color: var(--ink-2); padding: 0 16px 10px; line-height: 1.6; }
+  .rec { display: flex; gap: 9px; padding: 6px 16px; font-size: 12px; align-items: baseline; }
+  .rec .ic { flex: none; }
+  .rec b { display: block; font-size: 11px; color: var(--ink-2); font-weight: 400; }
+  .claude-card .orb { font-size: 34px; text-align: right; padding: 0 18px 12px; }
+  .med-card { border-color: var(--alert-line); background: linear-gradient(180deg, #fff2f5, #fffafb); }
+  .med-row { display: flex; align-items: center; gap: 10px; padding: 4px 16px 16px; font-size: 13px; }
+  .med-row time { color: var(--ink-2); font-size: 12px; display: block; }
+  .toggle { margin-left: auto; width: 44px; height: 25px; background: #f2758c; border-radius: 999px; position: relative; flex: none; }
+  .toggle::after { content: ''; position: absolute; top: 3px; right: 3px; width: 19px; height: 19px; background: #fff; border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+
+  /* ── 폰 목업 ──────────────────────────── */
+  .phone-wrap { display: flex; }
+  .phone {
+    width: 252px; margin: 0 auto; background: #3b3660; border-radius: 34px; padding: 10px;
+    box-shadow: var(--shadow), inset 0 0 0 2px #55508a;
+  }
+  .phone .screen { background: var(--panel-solid); border-radius: 26px; overflow: hidden; }
+  .phone .status { display: flex; justify-content: space-between; font-size: 10px; padding: 8px 16px 2px; color: var(--ink-2); }
+  .phone .notch { width: 86px; height: 18px; background: #3b3660; border-radius: 0 0 12px 12px; margin: -22px auto 0; position: relative; }
+  .phone .p-body { padding: 12px 14px 8px; }
+  .phone h4 { font-size: 15px; }
+  .phone .p-date { font-size: 11px; color: var(--ink-2); margin: 2px 0 10px; }
+  .p-box { border: 2px solid var(--line); border-radius: 11px; background: #fff; padding: 9px 10px; margin-bottom: 10px; }
+  .p-box h6 { font-size: 10.5px; color: var(--ink-2); margin-bottom: 6px; }
+  .p-sum { display: flex; gap: 8px; font-size: 10.5px; }
+  .p-sum div { flex: 1; }
+  .p-sum b { display: block; font-size: 13px; }
+  .p-trk { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .p-trk i { aspect-ratio: 1; border-radius: 3px; }
+  .p-nav { display: flex; border-top: 2px solid var(--line); background: var(--panel-alt); }
+  .p-nav span { flex: 1; text-align: center; font-size: 9px; color: var(--ink-2); padding: 7px 0 9px; }
+  .p-nav span.on { color: var(--accent-deep); font-weight: 700; }
+  .p-nav i { display: block; font-size: 15px; font-style: normal; margin-bottom: 2px; }
+
+  /* ── 푸터 ─────────────────────────────── */
+  .foot {
+    text-align: center; margin-top: 34px; font-size: 15px; color: #fff;
+    text-shadow: 0 2px 0 rgba(111,95,224,.4);
+  }
+</style>
+</head>
+<body>
+
+<div id="sky">
+  <span class="moon">🌙</span>
+  <span class="shooting"></span>
+</div>
+
+<main>
+  <header class="hero">
+    <h1><span class="deco">🌙</span> 몰입캘린더 <span class="deco">⭐</span></h1>
+    <span class="tagline">+ ADHD 개발자를 위한 캘린더 + 10분 트래커 +</span>
+    <span class="sub">작은 블록의 몰입이, 큰 성장을 만든다</span>
+  </header>
+
+  <div class="row-top">
+    <!-- ── 메인 윈도우 ── -->
+    <section class="panel window">
+      <div class="titlebar"><i></i><i></i><i></i></div>
+      <div class="window-body">
+
+        <aside class="sidebar">
+          <div class="logo">⭐ 몰입캘린더</div>
+          <nav class="nav">
+            <a class="active" href="#">🗓️ 먼슬리</a>
+            <a href="#">📅 위클리</a>
+            <a href="#">⏱️ 10분 트래커</a>
+            <a href="#">⏰ 오늘의 루틴&알람</a>
+            <a href="#">🐙 GitHub 프로젝트</a>
+            <a href="#">🏷️ 태그</a>
+          </nav>
+
+          <div class="side-sec">
+            <h4>GitHub 프로젝트 <span class="spacer"></span> ＋</h4>
+            <div class="repo-card">
+              <div class="name">📋 algo-study-notebooks</div>
+              <span class="chip">PR 2</span><span class="chip">Issue 5</span>
+            </div>
+            <div class="repo-card">
+              <div class="name">🌙 adhd-calendar</div>
+              <span class="chip">PR 1</span><span class="chip">Issue 3</span>
+            </div>
+          </div>
+
+          <div class="side-sec">
+            <h4>태그 <span class="spacer"></span> 편집</h4>
+            <div class="tag-row"><i class="dot" style="background:var(--c-routine)"></i>루틴/알람</div>
+            <div class="tag-row"><i class="dot" style="background:var(--c-ai)"></i>AI/Claude</div>
+            <div class="tag-row"><i class="dot" style="background:var(--c-project)"></i>습관</div>
+            <div class="tag-row"><i class="dot" style="background:var(--star)"></i>성취/보상</div>
+            <div class="tag-row"><i class="dot" style="background:var(--c-etc)"></i>기타</div>
+          </div>
+        </aside>
+
+        <div class="cal">
+          <div class="cal-top">
+            <button class="nav-arrow" aria-label="이전 달">‹</button>
+            <h2>2025년 5월</h2>
+            <button class="nav-arrow" aria-label="다음 달">›</button>
+            <button class="btn-today">오늘</button>
+          </div>
+          <div class="cal-grid" id="calGrid">
+            <div class="wd sun">일</div><div class="wd">월</div><div class="wd">화</div>
+            <div class="wd">수</div><div class="wd">목</div><div class="wd">금</div><div class="wd">토</div>
+          </div>
+        </div>
+
+        <aside class="daypane">
+          <h3>⭐ 5월 15일 (목)</h3>
+
+          <div class="day-box">
+            <h5>일정</h5>
+            <div class="sched"><time>10:00</time> 팀 데일리 스크럼</div>
+            <div class="sched"><time>14:00</time> 코드 리뷰</div>
+            <div class="sched"><time>17:30</time> 알고리즘 스터디</div>
+          </div>
+
+          <div class="day-box">
+            <h5>루틴 &amp; 알람</h5>
+            <div class="routine r-alert"><span>⏰</span> 비타민 약 복용 <time>09:00</time><span class="ck">✓</span></div>
+            <div class="routine r-ai"><span>🔮</span> Claude 코워크 루틴 <time>13:00</time><span class="ck">✓</span></div>
+            <div class="routine r-ok"><span>🤸</span> 스트레칭 &amp; 물마시기 <time>16:00</time><span class="ck">✓</span></div>
+          </div>
+
+          <div class="day-box">
+            <h5>오늘 요약</h5>
+            <div class="sumline">🟪 오늘 채운 블록 <b>24 / 84</b></div>
+            <div class="sumline">⏳ 누적 몰입 시간 <b>4시간 00분</b></div>
+          </div>
+
+          <button class="btn-add">＋ 할 일 추가</button>
+        </aside>
+      </div>
+    </section>
+
+    <!-- ── 10분 트래커 ── -->
+    <section class="panel tracker">
+      <div class="panel-head">⭐ 10분 트래커 <span class="spacer"></span><span class="qmark">?</span></div>
+      <div class="range">08:00 – 22:00 · 한 칸 = 10분</div>
+      <div class="trk-grid" id="trkGrid"></div>
+      <div class="legend">
+        <span><i style="background:var(--c-coding)"></i>코딩테스트</span>
+        <span><i style="background:var(--c-cs)"></i>CS·학습</span>
+        <span><i style="background:var(--c-project)"></i>프로젝트</span>
+        <span><i style="background:var(--c-resume)"></i>이력서</span>
+        <span><i style="background:var(--c-routine)"></i>루틴/알람</span>
+        <span><i style="background:var(--c-ai)"></i>AI/Claude</span>
+        <span><i style="background:var(--c-etc)"></i>기타</span>
+      </div>
+    </section>
+  </div>
+
+  <div class="row-bottom">
+    <!-- ── 위클리 뷰 ── -->
+    <section class="panel weekly">
+      <div class="wk-head">위클리 뷰 <span style="flex:1"></span>
+        <span style="font-weight:400;font-size:12px;color:var(--ink-2)">‹ 5월 12일 – 5월 18일 ›</span>
+        <button class="btn-today">오늘</button>
+      </div>
+      <div class="wk-cal" id="wkHead">
+        <div></div>
+        <div class="col-h">월 5/12</div><div class="col-h">화 5/13</div><div class="col-h">수 5/14</div>
+        <div class="col-h">목 5/15</div><div class="col-h">금 5/16</div><div class="col-h">토 5/17</div><div class="col-h">일 5/18</div>
+      </div>
+      <div class="wk-body" id="wkBody"><div class="wk-times" id="wkTimes"></div></div>
+      <div class="legend wk-legend">
+        <span><i style="background:var(--c-coding)"></i>코딩테스트</span>
+        <span><i style="background:var(--c-cs)"></i>CS·학습</span>
+        <span><i style="background:var(--c-project)"></i>프로젝트</span>
+        <span><i style="background:var(--c-resume)"></i>이력서 작성</span>
+        <span><i style="background:var(--c-ai)"></i>AI/Claude</span>
+        <span><i style="background:var(--c-routine)"></i>루틴/알람</span>
+      </div>
+    </section>
+
+    <!-- ── 몰입 분석 대시보드 ── -->
+    <section class="panel dash">
+      <div class="panel-head">⭐ 몰입 분석 대시보드</div>
+      <div class="dash-stats">
+        <div class="stat">XP<b>230 <small>/ Lv.3</small></b><span class="xpbar"><i></i></span></div>
+        <div class="stat">연속 🌟<b>7일</b></div>
+        <div class="stat">이번 주 몰입<b>18시간 40분</b></div>
+      </div>
+      <div class="dash-lower">
+        <div class="donut-box">
+          <h5>최근 30일 활동 비율</h5>
+          <div class="donut-flex">
+            <div class="donut" role="img" aria-label="활동 비율: 코딩테스트 28%, CS·학습 26%, 프로젝트 32%, 이력서 작성 14%"></div>
+            <div class="donut-lg">
+              <span><i style="background:var(--c-coding)"></i>코딩테스트<b>28%</b></span>
+              <span><i style="background:var(--c-cs)"></i>CS·학습<b>26%</b></span>
+              <span><i style="background:var(--c-project)"></i>프로젝트<b>32%</b></span>
+              <span><i style="background:var(--c-resume)"></i>이력서 작성<b>14%</b></span>
+            </div>
+          </div>
+        </div>
+        <div class="auto-card">
+          <h5>밤마다 GitHub 커밋을<br/>자동 분류해줘요!</h5>
+          <ul>
+            <li>커밋 메시지 분석</li>
+            <li>파일 변경 패턴</li>
+            <li>프로젝트 맥락 이해</li>
+          </ul>
+          <span class="wand">🪄</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── Claude 추천 + 약 알람 ── -->
+    <div class="stack">
+      <section class="panel claude-card">
+        <div class="panel-head">🔮 Claude 코워크 추천 루틴 <span class="spacer"></span><span class="badge-ai">AI</span></div>
+        <p class="desc">당신의 패턴을 분석했어요.<br/>집중이 잘되는 루틴이에요!</p>
+        <div class="rec"><span class="ic">✨</span><div>13:00 – 15:00<b>Deep Work 블록 (120분)</b></div></div>
+        <div class="rec"><span class="ic">🌱</span><div>15:20 – 15:40<b>짧은 휴식 &amp; 스트레칭</b></div></div>
+        <div class="rec"><span class="ic">💻</span><div>16:00 – 18:00<b>구현 &amp; 테스트 블록</b></div></div>
+        <div class="rec"><span class="ic">📝</span><div>20:00 – 20:30<b>회고 &amp; 정리</b></div></div>
+        <div class="orb">🔮</div>
+      </section>
+
+      <section class="panel med-card">
+        <div class="panel-head">💊 매일 약 복용 알람</div>
+        <div class="med-row">
+          <span>⏰</span>
+          <div>비타민 약 복용하기<time>09:00 · 매일</time></div>
+          <span class="toggle" role="switch" aria-checked="true" aria-label="알람 켜짐"></span>
+        </div>
+      </section>
+    </div>
+
+    <!-- ── 폰 목업 ── -->
+    <div class="phone-wrap">
+      <div class="phone">
+        <div class="screen">
+          <div class="status"><span>9:41</span><span>📶 🔋</span></div>
+          <div class="notch"></div>
+          <div class="p-body">
+            <h4>안녕하세요! 🌙</h4>
+            <p class="p-date">5월 15일 목요일</p>
+            <div class="p-box">
+              <h6>오늘 요약</h6>
+              <div class="p-sum">
+                <div>🟪 채운 블록<b>24 / 84</b></div>
+                <div>⏳ 누적 몰입<b>4시간 00분</b></div>
+              </div>
+            </div>
+            <div class="p-box">
+              <h6>10분 트래커 · 08:00 – 22:00</h6>
+              <div class="p-trk" id="pTrk"></div>
+            </div>
+          </div>
+          <div class="p-nav">
+            <span class="on"><i>🗓️</i>오늘</span>
+            <span><i>📅</i>위클리</span>
+            <span><i>⭐</i>트래커</span>
+            <span><i>⏰</i>루틴</span>
+            <span><i>⋯</i>더보기</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <p class="foot">🌙 작은 10분의 선택이, 당신의 큰 변화를 만들어가요 ✨</p>
+</main>
+
+<script>
+  // 목업 데이터 전용 시드 난수 — 새로고침해도 같은 그림 유지
+  function lcg(seed) {
+    let s = seed >>> 0;
+    return () => (s = (s * 1664525 + 1013904223) >>> 0) / 4294967296;
+  }
+  const CAT = ['--c-coding', '--c-cs', '--c-project', '--c-resume', '--c-routine', '--c-ai'];
+  const v = (name) => `var(${name})`;
+
+  // ── 하늘: 픽셀 별 + 구름 ──
+  (function sky() {
+    const host = document.getElementById('sky');
+    const rnd = lcg(7);
+    const glyphs = ['✦', '✧', '＋', '·'];
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 46; i++) {
+      const s = document.createElement('span');
+      s.className = 'star';
+      s.textContent = glyphs[Math.floor(rnd() * glyphs.length)];
+      s.style.left = `${rnd() * 100}%`;
+      s.style.top = `${rnd() * 100}%`;
+      s.style.fontSize = `${8 + rnd() * 12}px`;
+      s.style.animationDelay = `${rnd() * 3}s`;
+      if (rnd() < 0.3) s.style.color = '#ffe9a8';
+      frag.appendChild(s);
+    }
+    [[8, 78, 260], [70, 88, 320], [40, 92, 220]].forEach(([l, t, w]) => {
+      const c = document.createElement('span');
+      c.className = 'cloud';
+      c.style.cssText = `left:${l}%;top:${t}%;width:${w}px;height:${w * 0.32}px`;
+      frag.appendChild(c);
+    });
+    host.appendChild(frag);
+  })();
+
+  // ── 먼슬리: 4/27 ~ 6/7, 날짜별 태그 점 ──
+  (function month() {
+    const grid = document.getElementById('calGrid');
+    const rnd = lcg(20250515);
+    const starDays = new Set([2, 9, 16, 23, 30]);
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 42; i++) {
+      const cell = document.createElement('div');
+      let day, dim = false;
+      if (i < 4) { day = 27 + i; dim = true; }
+      else if (i < 35) { day = i - 3; }
+      else { day = i - 34; dim = true; }
+      cell.className = 'cell' + (dim ? ' dim' : '') + (i % 7 === 0 ? ' sun' : '') + (day === 15 && !dim ? ' today' : '');
+      let html = `<span class="d">${day}</span>`;
+      if (!dim && starDays.has(day)) html += '<span class="star-b">⭐</span>';
+      if (!dim) {
+        const n = 1 + Math.floor(rnd() * 3);
+        html += '<span class="dots">' +
+          Array.from({ length: n }, () => `<i style="background:${v(CAT[Math.floor(rnd() * CAT.length)])}"></i>`).join('') +
+          '</span>';
+      }
+      cell.innerHTML = html;
+      frag.appendChild(cell);
+    }
+    grid.appendChild(frag);
+  })();
+
+  // ── 10분 트래커: 08~21시, 시간당 6칸 (총 84칸) ──
+  (function tracker() {
+    const host = document.getElementById('trkGrid');
+    const rnd = lcg(84);
+    const frag = document.createDocumentFragment();
+    for (let h = 8; h <= 21; h++) {
+      const row = document.createElement('div');
+      row.className = 'trk-row';
+      row.innerHTML = `<span class="h">${String(h).padStart(2, '0')}</span>`;
+      const fillP = h < 19 ? 0.85 : 0.25; // 저녁 이후는 드문드문
+      for (let b = 0; b < 6; b++) {
+        const cell = document.createElement('i');
+        if (rnd() < fillP) {
+          cell.className = 'blk';
+          cell.style.background = v(CAT[Math.floor(rnd() * CAT.length)]);
+        } else {
+          cell.className = 'blk empty';
+        }
+        row.appendChild(cell);
+      }
+      frag.appendChild(row);
+    }
+    host.appendChild(frag);
+  })();
+
+  // ── 위클리: 시간축 + 이벤트 블록 ──
+  (function weekly() {
+    const H0 = 8, H1 = 22, PX = 24; // 1시간 = 24px
+    const times = document.getElementById('wkTimes');
+    for (let h = H0; h <= H1; h += 2) {
+      const s = document.createElement('span');
+      s.textContent = `${String(h).padStart(2, '0')}:00`;
+      s.style.top = `${(h - H0) * PX}px`;
+      times.appendChild(s);
+    }
+    const events = [
+      [0, 9, 11, '알고리즘 문제풀이', '--c-coding'], [0, 13, 15, '프로젝트 구현', '--c-project'], [0, 20, 21, '저녁 회고', '--c-resume'],
+      [1, 10, 12, 'CS 네트워크', '--c-cs'], [1, 14.5, 15.5, '팀 미팅', '--c-resume'], [1, 19, 20, '운동', '--c-project'],
+      [2, 9, 11, '프로젝트 구현', '--c-project'], [2, 13, 14, '코드 리뷰', '--c-coding'], [2, 20, 21, '저녁 회고', '--c-resume'],
+      [3, 9.5, 11, 'Claude 코워크', '--c-ai'], [3, 13, 15, 'Deep Work 블록', '--c-cs'], [3, 17.5, 19, '알고리즘 스터디', '--c-coding'],
+      [4, 9, 11, '이력서 작성', '--c-resume'], [4, 14, 15, '포트폴리오 정리', '--c-cs'], [4, 20, 21, '회고 정리', '--c-resume'],
+      [5, 11, 13, 'Claude 몰입 블록', '--c-ai'], [5, 15, 16, '독서', '--c-etc'],
+      [6, 12, 13, '주간 회고', '--c-resume'], [6, 15, 16, '휴식 산책', '--c-project'],
+    ];
+    const body = document.getElementById('wkBody');
+    const cols = [];
+    for (let d = 0; d < 7; d++) {
+      const col = document.createElement('div');
+      col.className = 'wk-col';
+      body.appendChild(col);
+      cols.push(col);
+    }
+    events.forEach(([d, s, e, label, color]) => {
+      const el = document.createElement('div');
+      el.className = 'evt';
+      el.textContent = label;
+      el.style.top = `${(s - H0) * PX}px`;
+      el.style.height = `${(e - s) * PX - 3}px`;
+      el.style.background = v(color);
+      cols[d].appendChild(el);
+    });
+  })();
+
+  // ── 폰 미니 트래커 ──
+  (function phoneTrk() {
+    const host = document.getElementById('pTrk');
+    const rnd = lcg(941);
+    const frag = document.createDocumentFragment();
+    for (let i = 0; i < 60; i++) {
+      const cell = document.createElement('i');
+      cell.style.background = rnd() < 0.55 ? v(CAT[Math.floor(rnd() * CAT.length)]) : '#efecf6';
+      frag.appendChild(cell);
+    }
+    host.appendChild(frag);
+  })();
+</script>
+</body>
+</html>

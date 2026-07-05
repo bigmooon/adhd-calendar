@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Focus Calendar — 사용설명서</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri@latest/dist/galmuri.css" />
+<style>
+  :root {
+    --sky1: #C9B6F0; --sky2: #E3B8E0; --sky3: #AFC8F0;
+    --surface: #FFFCFE; --surface-alt: #F3E9FB; --border: #C9A8E0;
+    --text-primary: #4A3B6B; --text-secondary: #7C6B9E; --text-tertiary: #A594C4;
+    --pop: #AEBEF1; --pop-deep: #7C6FE0; --pop-glow: rgba(174,190,241,0.6); --star: #FFD966;
+    --alert: #FF8FB3; --alert-subtle: #FFE3ED;
+    --success: #7FDBB6; --success-subtle: #DEF9EE;
+    --ai: #C9A8F0; --ai-subtle: #F1E6FF;
+    --shadow: 0 6px 16px rgba(124,111,224,0.22);
+    --font: "Galmuri11", -apple-system, sans-serif;
+    --font-mono: "Galmuri9", "Galmuri11", monospace;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: var(--font); color: var(--text-primary); line-height: 1.7; font-size: 16px;
+    background: linear-gradient(160deg, var(--sky1) 0%, var(--sky2) 45%, var(--sky3) 100%);
+    min-height: 100vh; position: relative; overflow-x: hidden;
+  }
+  .sky-deco { position: fixed; inset: 0; pointer-events: none; z-index: 0; }
+  .sky-deco span { position: absolute; opacity: 0.7; width: 9px; height: 9px; transform: rotate(45deg); animation: twinkle 3s ease-in-out infinite; }
+  .sky-deco span.pink { background: #FFD6EC; } .sky-deco span.blue { background: #CFE6FF; } .sky-deco span.white { background: #FFFFFF; }
+  @keyframes twinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.85; } }
+  @media (prefers-reduced-motion: reduce) { .sky-deco span { animation: none; opacity: 0.5; } }
+
+  .wrap { max-width: 760px; margin: 0 auto; padding: 32px 20px 80px; position: relative; z-index: 1; }
+
+  .title-plate {
+    text-align: center; border: 5px solid #fff; background: var(--surface); border-radius: 28px;
+    padding: 32px 20px; margin-bottom: 32px; box-shadow: var(--shadow), 0 0 30px var(--pop-glow);
+  }
+  .title-plate .moon { width: 44px; height: 44px; margin-bottom: 12px; }
+  .title-plate h1 { font-size: 24px; font-weight: 400; margin: 0 0 8px; color: var(--pop-deep); }
+  .title-plate p { margin: 0; color: var(--text-secondary); font-size: 13px; }
+
+  .toc { border: 2px solid var(--border); background: var(--surface-alt); border-radius: 20px; padding: 16px 20px; margin-bottom: 32px; }
+  .toc h2 { font-size: 13px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--text-tertiary); margin: 0 0 10px; font-weight: 400; }
+  .toc ol { margin: 0; padding-left: 22px; }
+  .toc li { margin-bottom: 6px; }
+  .toc a { color: var(--pop-deep); text-decoration: none; }
+  .toc a:hover { text-decoration: underline; }
+
+  section.panel { border: 2px solid var(--border); background: var(--surface); border-radius: 20px; padding: 20px 22px; margin-bottom: 24px; box-shadow: var(--shadow); scroll-margin-top: 20px; }
+  section.panel h2 { display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 400; color: var(--pop-deep); margin: 0 0 14px; padding-bottom: 10px; border-bottom: 2px dashed var(--border); }
+  section.panel h2 canvas { flex-shrink: 0; image-rendering: pixelated; }
+  section.panel p { margin: 0 0 10px; color: var(--text-secondary); font-size: 14px; }
+  section.panel ul { margin: 0 0 10px; padding-left: 20px; color: var(--text-secondary); font-size: 14px; }
+  section.panel li { margin-bottom: 6px; }
+
+  .key { display: inline-flex; align-items: center; justify-content: center; min-width: 22px; height: 22px; padding: 0 6px; background: var(--surface-alt); border: 2px solid var(--border); border-radius: 8px; font-family: var(--font-mono); font-size: 12px; color: var(--pop-deep); }
+
+  .callout { border: 2px solid var(--ai); background: var(--ai-subtle); color: var(--pop-deep); border-radius: 14px; padding: 12px 14px; font-size: 13px; margin: 12px 0; }
+  .callout.ok { border-color: var(--success); background: var(--success-subtle); }
+
+  code { font-family: var(--font-mono); background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 2px 6px; font-size: 13px; color: #B8860B; }
+  pre { font-family: var(--font-mono); background: #2B2350; color: #A8F0D0; border: 2px solid var(--border); border-radius: 14px; padding: 12px 14px; overflow-x: auto; font-size: 12px; margin: 10px 0; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; margin: 10px 0; }
+  th, td { border: 1px solid var(--border); padding: 8px 10px; text-align: left; color: var(--text-secondary); }
+  th { background: var(--surface-alt); color: var(--pop-deep); font-weight: 400; }
+
+  .xp-formula { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-family: var(--font-mono); font-size: 13px; color: var(--pop-deep); }
+
+  .cta { display: block; text-align: center; margin-top: 32px; padding: 16px; border: 3px solid #fff; border-radius: 22px; background: var(--pop-deep); color: #fff; text-decoration: none; font-size: 15px; box-shadow: var(--shadow), 0 0 20px var(--pop-glow); }
+  .cta:hover { filter: brightness(1.08); }
+  .footer-note { text-align: center; color: var(--text-tertiary); font-size: 11px; margin-top: 20px; }
+</style>
+</head>
+<body>
+<div class="sky-deco" id="skyDeco"></div>
+<div class="wrap">
+
+  <div class="title-plate">
+    <canvas class="moon" id="titleMoon" width="44" height="44"></canvas>
+    <h1>FOCUS CALENDAR</h1>
+    <p>플레이어 매뉴얼 — v0.1 · ADHD 개발자를 위한 몰입 관리 게임</p>
+  </div>
+
+  <nav class="toc">
+    <h2>목차</h2>
+    <ol>
+      <li><a href="#screens">1. 화면 구성</a></li>
+      <li><a href="#views">2. 세 가지 보기 — 먼슬리 / 위클리 / 10분 트래커</a></li>
+      <li><a href="#routines">3. 루틴 &amp; 알람</a></li>
+      <li><a href="#tracker">4. 10분 타임 트래커 사용법</a></li>
+      <li><a href="#xp">5. GitHub 자동화 &amp; 경험치(XP) 시스템</a></li>
+      <li><a href="#tips">6. 공략 팁</a></li>
+    </ol>
+  </nav>
+
+  <section class="panel" id="screens">
+    <h2><canvas class="icon-h" data-icon="calendar" width="24" height="24"></canvas>1. 화면 구성</h2>
+    <p>왼쪽 <strong>사이드바</strong>에는 보기 전환 메뉴, 오늘의 루틴&amp;알람, 연결된 GitHub 프로젝트, 태그 목록이 있습니다.</p>
+    <p>오른쪽 <strong>메인 화면</strong> 상단 헤더에는 오늘 날짜와 누적 몰입 시간, 뷰 탭, 다크모드 토글이 있고 우하단에는 <span class="key">＋ 할 일 추가</span> 버튼(FAB)이 항상 떠 있습니다.</p>
+  </section>
+
+  <section class="panel" id="views">
+    <h2><canvas class="icon-h" data-icon="hourglass" width="24" height="24"></canvas>2. 세 가지 보기</h2>
+    <ul>
+      <li><strong>먼슬리</strong> — 한 달을 한눈에. 날짜 칸 안의 점은 그날의 태그 색을 의미합니다. <span class="key">◀</span> <span class="key">▶</span> 로 월 이동, <span class="key">오늘</span> 버튼으로 즉시 복귀.</li>
+      <li><strong>날짜 클릭 → 상세 보기</strong> — 아무 날짜나 클릭하면 그날의 일정과 루틴이 펼쳐집니다(드릴다운). <span class="key">먼슬리로</span>로 돌아갑니다.</li>
+      <li><strong>위클리</strong> — 시간대별 가로 그리드로 하루 흐름을 확인합니다.</li>
+      <li><strong>10분 트래커</strong> — 하루를 10분 단위 칸으로 쪼갠 뷰. 자세한 사용법은 4장 참고.</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="routines">
+    <h2><canvas class="icon-h" data-icon="sparkles" width="24" height="24"></canvas>3. 루틴 &amp; 알람</h2>
+    <p>사이드바의 루틴 카드는 색으로 종류를 구분합니다 — 이 색 규칙은 앱 전체에서 절대 바뀌지 않습니다:</p>
+    <table>
+      <tr><th>아이콘 색</th><th>의미</th></tr>
+      <tr><td style="color:var(--alert)">● 코럴 핑크</td><td>약 복용 등 <strong>매일 챙겨야 하는 알람</strong></td></tr>
+      <tr><td style="color:var(--ai)">● 라벤더</td><td>Claude 코워크가 자동으로 모아준 <strong>AI 추천 루틴</strong> (AI 배지 표시)</td></tr>
+      <tr><td style="color:var(--success)">● 민트</td><td>스트레칭 등 <strong>일반 습관</strong> — 완료하면 별을 획득한 느낌으로 처리</td></tr>
+    </table>
+    <div class="callout">색만 보고도 "이건 내가 챙긴 건지, AI가 모아준 건지" 바로 구분되도록 설계했습니다.</div>
+  </section>
+
+  <section class="panel" id="tracker">
+    <h2><canvas class="icon-h" data-icon="hourglass" width="24" height="24"></canvas>4. 10분 타임 트래커</h2>
+    <p>이 앱의 핵심 기능입니다. 하루(08:00~22:00)를 <strong>10분짜리 칸</strong>으로 쪼갠 그리드가 나타납니다.</p>
+    <ul>
+      <li>칸을 <strong>클릭</strong>할 때마다 태그 색이 순서대로 순환합니다 (업무 → 운동 → 딥워크 → 학습 → 비우기).</li>
+      <li>상단 통계 카드에 <strong>오늘 기록한 블록 수</strong>와 <strong>누적 몰입 시간</strong>이 실시간으로 갱신됩니다.</li>
+      <li>목표는 "얼마나 계획대로 했나"가 아니라 <strong>"실제로 몇 분 몰입했는지"를 눈으로 확인</strong>하는 것 — ADHD 특성상 체감 시간과 실제 시간의 괴리가 크기 때문입니다.</li>
+    </ul>
+  </section>
+
+  <section class="panel" id="xp">
+    <h2><canvas class="icon-h" data-icon="star" width="24" height="24"></canvas>5. GitHub 자동화 &amp; 경험치 시스템</h2>
+    <p><code>scripts/track_progress.py</code>가 매일 밤 22:00에 <strong>launchd</strong>로 자동 실행되어 GitHub 커밋과 로컬 폴더 활동을 감지합니다.</p>
+    <table>
+      <tr><th>카테고리</th><th>감지 대상</th><th>XP</th></tr>
+      <tr><td>코딩테스트</td><td><code>algo-study-notebooks</code>, <code>LeetCode</code>, <code>coding-test</code> 리포 커밋</td><td>커밋당 +10</td></tr>
+      <tr><td>CS/학습</td><td>llm 관련 실습 리포 커밋</td><td>기록만</td></tr>
+      <tr><td>프로젝트</td><td>그 외 앱/프로젝트 리포 커밋</td><td>기록만</td></tr>
+      <tr><td>이력서 작성</td><td><code>job_prep</code> 폴더 파일 변경</td><td>기록만</td></tr>
+    </table>
+    <div class="xp-formula">LEVEL = floor(XP / 100) + 1　·　100XP마다 레벨업</div>
+    <p style="margin-top:10px">코딩테스트 문제를 매일 풀어 커밋하면 <strong>스트릭(연속일)</strong>이 올라가고, 하루라도 거르면 1로 리셋됩니다 — 백준 스트릭과 동일한 규칙.</p>
+    <pre># 수동 실행
+python3 scripts/track_progress.py
+
+# 처음부터 다시 시작하고 싶을 때 (과거 기록 소급 없이)
+python3 scripts/track_progress.py --reset</pre>
+    <div class="callout ok">최근 30일 기준 카테고리별 균형(%)도 함께 출력됩니다 — 코딩테스트만 파고 CS/프로젝트/이력서를 놓치고 있진 않은지 확인용.</div>
+  </section>
+
+  <section class="panel" id="tips">
+    <h2><canvas class="icon-h" data-icon="wand" width="24" height="24"></canvas>6. 공략 팁</h2>
+    <ul>
+      <li>화면 오른쪽 상단 다크모드 버튼으로 야간용 팔레트 전환.</li>
+      <li>루틴 카드는 색이 곧 규칙입니다 — 새 루틴을 추가할 때도 이 색 배정을 유지하세요.</li>
+      <li>트래커 칸은 정확할 필요 없습니다. 대략이라도 채우는 것이 안 채우는 것보다 훨씬 낫습니다.</li>
+    </ul>
+  </section>
+
+  <a class="cta" href="design-preview.html">▶ PRESS START — 캘린더로 이동</a>
+  <p class="footer-note">Focus Calendar Design Preview · Galmuri 픽셀 폰트 · 픽셀화된 컬러 아이콘 사용</p>
+
+</div>
+
+<script>
+  const ICON_DEFS = {
+    moon: { vb: 36, svg: '<path fill="#ffd983" d="M30.312.776C32 19 20 32 .776 30.312c8.199 7.717 21.091 7.588 29.107-.429C37.9 21.867 38.03 8.975 30.312.776"/><path fill="#ffcc4d" d="M30.705 15.915a1.163 1.163 0 1 0 1.643 1.641a1.163 1.163 0 0 0-1.643-1.641m-16.022 14.38a1.74 1.74 0 0 0 0 2.465a1.742 1.742 0 1 0 0-2.465m13.968-2.147a2.904 2.904 0 0 1-4.108 0a2.9 2.9 0 0 1 0-4.107a2.9 2.9 0 0 1 4.108 0a2.9 2.9 0 0 1 0 4.107"/>' },
+    sparkles: { vb: 36, svg: '<path fill="#ffac33" d="m34.347 16.893l-8.899-3.294l-3.323-10.891a1 1 0 0 0-1.912 0l-3.322 10.891l-8.9 3.294a1 1 0 0 0 0 1.876l8.895 3.293l3.324 11.223a1 1 0 0 0 1.918-.001l3.324-11.223l8.896-3.293a.998.998 0 0 0-.001-1.875"/><path fill="#ffcc4d" d="m14.347 27.894l-2.314-.856l-.9-3.3a.998.998 0 0 0-1.929-.001l-.9 3.3l-2.313.856a1 1 0 0 0 0 1.876l2.301.853l.907 3.622a1 1 0 0 0 1.94-.001l.907-3.622l2.301-.853a.997.997 0 0 0 0-1.874M10.009 6.231l-2.364-.875l-.876-2.365a.999.999 0 0 0-1.876 0l-.875 2.365l-2.365.875a1 1 0 0 0 0 1.876l2.365.875l.875 2.365a1 1 0 0 0 1.876 0l.875-2.365l2.365-.875a1 1 0 0 0 0-1.876"/>' },
+    star: { vb: 36, svg: '<path fill="#ffac33" d="M28.84 17.638c-.987 1.044-1.633 3.067-1.438 4.493l.892 6.441c.197 1.427-.701 2.087-1.996 1.469l-5.851-2.796c-1.295-.62-3.408-.611-4.7.018l-5.826 2.842c-1.291.629-2.193-.026-2.007-1.452l.843-6.449c.186-1.427-.475-3.444-1.47-4.481l-4.494-4.688c-.996-1.037-.655-2.102.755-2.365l6.37-1.188c1.41-.263 3.116-1.518 3.793-2.789L16.762.956c.675-1.271 1.789-1.274 2.473-.009L22.33 6.66c.686 1.265 2.4 2.507 3.814 2.758l6.378 1.141c1.412.252 1.761 1.314.774 2.359z"/><path fill="#ffd983" d="M9.783 2.181c1.023 1.413 2.446 4.917 1.717 5.447c-.728.531-3.607-1.91-4.63-3.323s-.935-2.668-.131-3.254c.804-.587 2.02-.282 3.044 1.13m19.348 2.124C28.109 5.718 25.23 8.16 24.5 7.627c-.729-.53.695-4.033 1.719-5.445C27.242.768 28.457.463 29.262 1.051c.803.586.89 1.841-.131 3.254M16.625 33.291c-.001-1.746.898-5.421 1.801-5.421c.897 0 1.798 3.675 1.797 5.42c0 1.747-.804 2.712-1.8 2.71c-.994.002-1.798-.962-1.798-2.709m16.179-9.262c-1.655-.539-4.858-2.533-4.579-3.395c.277-.858 4.037-.581 5.69-.041c1.655.54 2.321 1.605 2.013 2.556c-.308.95-1.469 1.42-3.124.88M2.083 20.594c1.655-.54 5.414-.817 5.694.044c.276.857-2.928 2.854-4.581 3.392c-1.654.54-2.818.07-3.123-.88c-.308-.95.354-2.015 2.01-2.556"/>' },
+    hourglass: { vb: 36, svg: '<path fill="#ffe8b6" d="M21 18c0-2.001 3.246-3.369 5-6c2-3 2-10 2-10H8s0 7 2 10c1.754 2.631 5 3.999 5 6s-3.246 3.369-5 6c-2 3-2 10-2 10h20s0-7-2-10c-1.754-2.631-5-3.999-5-6"/><path fill="#ffac33" d="M18 2h-8s0 4 1 7c1.304 3.912 6 4.999 6 9s0 13 1 13s1-9 1-13s4.697-5.088 6-9c1-3 1-7 1-7z"/><path fill="#3b88c3" d="M30 34a2 2 0 0 1-2 2H8a2 2 0 0 1 0-4h20a2 2 0 0 1 2 2m0-32a2 2 0 0 1-2 2H8a2 2 0 0 1 0-4h20a2 2 0 0 1 2 2"/>' },
+    calendar: { vb: 36, svg: '<path fill="#e0e7ec" d="M36 32a4 4 0 0 1-4 4H4a4 4 0 0 1-4-4V9a4 4 0 0 1 4-4h28a4 4 0 0 1 4 4z"/><path fill="#66757f" d="M23.657 19.12H17.87c-1.22 0-1.673-.791-1.673-1.56c0-.791.429-1.56 1.673-1.56h8.184c1.154 0 1.628 1.04 1.628 1.628c0 .452-.249.927-.52 1.492l-5.607 11.395c-.633 1.266-.882 1.717-1.899 1.717c-1.244 0-1.877-.949-1.877-1.605c0-.271.068-.474.226-.791zM10.889 19h-.5c-1.085 0-1.538-.731-1.538-1.5c0-.792.565-1.5 1.538-1.5h2.015c.972 0 1.515.701 1.515 1.605V30.47c0 1.13-.558 1.763-1.53 1.763s-1.5-.633-1.5-1.763z"/><path fill="#dd2f45" d="M34 0h-3.277c.172.295.277.634.277 1a2 2 0 0 1-4 0c0-.366.105-.705.277-1H8.723C8.895.295 9 .634 9 1a2 2 0 0 1-4 0c0-.366.105-.705.277-1H2a2 2 0 0 0-2 2v11h36V2a2 2 0 0 0-2-2"/><path fill="#f4abba" d="M32 10a1 1 0 1 0 2 0a1 1 0 0 0-2 0m0-3a1 1 0 1 0 2 0a1 1 0 0 0-2 0m-3 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0m0-3a1 1 0 1 0 2 0a1 1 0 0 0-2 0m-3 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0m0-3a1 1 0 1 0 2 0a1 1 0 0 0-2 0m-3 0a1 1 0 1 0 2 0a1 1 0 0 0-2 0m0 3a1 1 0 1 0 2 0a1 1 0 0 0-2 0"/>' },
+    wand: { vb: 36, svg: '<path fill="#292f33" d="M3.651 29.852L29.926 3.576c.391-.391 2.888 2.107 2.497 2.497L6.148 32.349c-.39.391-2.888-2.107-2.497-2.497"/><path fill="#66757f" d="M30.442 4.051L4.146 30.347l.883.883L31.325 4.934z"/><path fill="#e1e8ed" d="m34.546 2.537l-.412-.412l-.671-.671a1 1 0 0 0-.255-.169a.99.99 0 0 0-1.159.169l-2.102 2.102l.495.495l.883.883l1.119 1.119l2.102-2.102a1 1 0 0 0 0-1.414M5.029 31.23l-.883-.883l-.495-.495l-2.209 2.208a.99.99 0 0 0-.169 1.159c.046.09.094.18.169.255l.671.671l.412.412a1 1 0 0 0 1.414 0l2.208-2.208z"/><path fill="#f5f8fa" d="m31.325 4.934l2.809-2.809l-.671-.671a1 1 0 0 0-.255-.169l-2.767 2.767zM4.146 30.347L1.273 33.22c.046.09.094.18.169.255l.671.671l2.916-2.916z"/><path fill="#ffac33" d="m28.897 14.913l1.542-.571l.6-2.2a.667.667 0 0 1 1.287 0l.6 2.2l1.542.571a.665.665 0 0 1 0 1.25l-1.534.568l-.605 2.415a.667.667 0 0 1-1.293 0l-.605-2.415l-1.534-.568a.665.665 0 0 1 0-1.25M11.961 5.285l2.61-.966l.966-2.61a1.103 1.103 0 0 1 2.07 0l.966 2.61l2.609.966a1.103 1.103 0 0 1 0 2.07l-2.609.966l-.966 2.61a1.105 1.105 0 0 1-2.07 0l-.966-2.61l-2.61-.966a1.104 1.104 0 0 1 0-2.07M24.13 20.772l1.383-.512l.512-1.382a.585.585 0 0 1 1.096 0l.512 1.382l1.382.512a.584.584 0 0 1 0 1.096l-1.382.512l-.512 1.382a.585.585 0 0 1-1.096 0l-.512-1.382l-1.383-.512a.585.585 0 0 1 0-1.096"/>' }
+  };
+  function pixelateIcon(canvas, defKey, grid) {
+    const def = ICON_DEFS[defKey];
+    if (!def) return;
+    const displaySize = canvas.width || 24;
+    const svgStr = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ' + def.vb + ' ' + def.vb + '">' + def.svg + '</svg>';
+    const img = new Image();
+    const blob = new Blob([svgStr], { type: 'image/svg+xml' });
+    const url = URL.createObjectURL(blob);
+    img.onload = () => {
+      const small = document.createElement('canvas');
+      small.width = grid; small.height = grid;
+      small.getContext('2d').drawImage(img, 0, 0, grid, grid);
+      const ctx = canvas.getContext('2d');
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(small, 0, 0, grid, grid, 0, 0, displaySize, displaySize);
+      URL.revokeObjectURL(url);
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  }
+  pixelateIcon(document.getElementById('titleMoon'), 'moon', 18);
+  document.querySelectorAll('.icon-h').forEach(c => pixelateIcon(c, c.dataset.icon, 14));
+
+  const skyDeco = document.getElementById('skyDeco');
+  const decoTypes = ['pink', 'blue', 'white'];
+  for (let i = 0; i < 16; i++) {
+    const s = document.createElement('span');
+    s.className = decoTypes[i % decoTypes.length];
+    s.style.left = Math.random() * 100 + '%';
+    s.style.top = Math.random() * 100 + '%';
+    s.style.animationDelay = (Math.random() * 3) + 's';
+    skyDeco.appendChild(s);
+  }
+</script>
+</body>
+</html>
