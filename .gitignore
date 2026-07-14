@@ -1,3 +1,9 @@
 __pycache__/
 logs/
 .DS_Store
+
+# Playwright / node
+node_modules/
+/test-results/
+/playwright-report/
+/blob-report/

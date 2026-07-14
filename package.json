@@ -1,0 +1,14 @@
+{
+  "name": "adhd-calendar",
+  "version": "0.1.0",
+  "private": true,
+  "description": "몰입캘린더 — ADHD 개발자용 몰입 관리 캘린더 (빌드 없는 정적 웹앱)",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:ui": "playwright test --ui"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.0"
+  }
+}
