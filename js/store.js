@@ -14,6 +14,7 @@ const DEFAULT_STORE = {
     { id: 'etc',     name: '기타',       color: '#d9d5e6' },
   ],
   events: [],   // {id,title,date,start,end,tag}
+  plans: [],    // {id,title,tag,due,steps:[{id,text,date,done}]} — 여행·프로젝트 공용 장기계획
   routines: [   // {id,name,time,kind:alert|ai|habit,enabled}
     { id: 'r1', name: '비타민 약 복용',      time: '09:00', kind: 'alert', enabled: true },
     { id: 'r2', name: 'Claude 코워크 루틴',  time: '13:00', kind: 'ai',    enabled: true },

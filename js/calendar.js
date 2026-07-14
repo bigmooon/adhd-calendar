@@ -11,6 +11,7 @@ function renderMonth() {
     (eventDates[ev.date] = eventDates[ev.date] || []).push(ev);
   }
   const ghDue = ghDueByDate(); // ② GitHub 마감 있는 날
+  const planMarks = planMarksByDate(); // 계획 마감일·날짜 있는 단계
   const grid = $('#calGrid');
   grid.innerHTML = WD.map((w, i) => `<div class="wd${i === 0 ? ' sun' : ''}">${w}</div>`).join('');
   const frag = document.createDocumentFragment();
@@ -30,7 +31,8 @@ function renderMonth() {
       .map((ev) => `<span class="ev-bar" style="border-left-color:${tagColor(ev.tag)};background:color-mix(in srgb, ${tagColor(ev.tag)} 18%, #fff)" title="${esc(ev.title)}">${esc(ev.title)}</span>`).join('');
     const more = evs.length > 3 ? `<span class="ev-more">+${evs.length - 3}개</span>` : '';
     const ghMark = ghDue[key] ? '<span class="gh-mark" title="GitHub 마감">🐙</span>' : '';
-    cell.innerHTML = `<span class="d">${d.getDate()}</span>${starBadge}${ghMark}<span class="evs">${bars}${more}</span>`;
+    const planMark = planMarks[key] ? '<span class="plan-mark" title="계획 일정/마감">🎯</span>' : '';
+    cell.innerHTML = `<span class="d">${d.getDate()}</span>${starBadge}${ghMark}${planMark}<span class="evs">${bars}${more}</span>`;
     cell.addEventListener('click', () => { selectedKey = key; renderAll(); });
     frag.appendChild(cell);
   }
