@@ -188,6 +188,8 @@ $('#wToday').addEventListener('click', () => { weekCursor = new Date(); renderWe
 function renderAll() {
   renderMonth();
   renderDayPane();
+  renderDayPlans();
+  renderPlans();
   renderTracker();
   renderWeek();
   renderDash();

@@ -2,7 +2,10 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="몰입캘린더" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 <title>몰입캘린더</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/quiple/galmuri@latest/dist/galmuri.css" />
 <link rel="stylesheet" href="css/styles.css" />
@@ -63,6 +66,11 @@
           <div class="day-box">
             <h5>일정 <span class="spacer"></span></h5>
             <div id="dayEvents"></div>
+          </div>
+
+          <div class="day-box">
+            <h5>🎯 계획 다음 단계</h5>
+            <div id="dayPlans"></div>
           </div>
 
           <div class="day-box">
@@ -152,6 +160,13 @@
     </div>
   </div>
 
+  <div class="row-plans">
+    <section class="panel plans-panel">
+      <div class="panel-head">🎯 장기 계획 (여행·프로젝트) <span class="spacer"></span><button class="btn-sm" id="planAddBtn">＋ 새 계획</button></div>
+      <div id="planList" class="plan-list"></div>
+    </section>
+  </div>
+
   <p class="foot">🌙 작은 10분의 선택이, 당신의 큰 변화를 만들어가요 ✨</p>
 </main>
 
@@ -213,6 +228,25 @@
   </form>
 </dialog>
 
+<!-- 새 계획 모달 -->
+<dialog id="planDialog">
+  <h3>🎯 새 계획</h3>
+  <form method="dialog" id="planForm">
+    <div class="seg" id="plTemplate">
+      <button type="button" class="seg-btn on" data-tpl="travel">✈️ 여행</button>
+      <button type="button" class="seg-btn" data-tpl="project">📁 프로젝트</button>
+      <button type="button" class="seg-btn" data-tpl="blank">📝 빈 계획</button>
+    </div>
+    <div class="f-row"><label for="plTitle">제목</label><input id="plTitle" type="text" required maxlength="60" placeholder="예: 제주도 여행" /></div>
+    <div class="f-row"><label for="plDue">목표일 · D-day <span style="color:var(--ink-3)">(선택)</span></label><input id="plDue" type="date" /></div>
+    <p class="dlg-note" id="plPreview"></p>
+    <div class="f-actions">
+      <button type="button" class="btn-ghost" id="plCancel">취소</button>
+      <button class="btn-primary" value="ok">만들기</button>
+    </div>
+  </form>
+</dialog>
+
 <div id="toasts" role="status"></div>
 
 <!-- GitHub 활동 데이터 (track_progress.py 생성). 없으면 아래 스크립트가 data.json fetch로 폴백 -->
@@ -221,6 +255,7 @@
 <script src="js/calendar.js"></script>
 <script src="js/dashboard.js"></script>
 <script src="js/github.js"></script>
+<script src="js/plans.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

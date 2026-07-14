@@ -286,3 +286,33 @@
 
   .foot { text-align: center; margin-top: 34px; font-size: 15px; color: #fff; text-shadow: 0 2px 0 rgba(111,95,224,.4); }
   #selftest { position: fixed; bottom: 4px; right: 8px; font-size: 10px; color: var(--ink-3); z-index: 100; }
+
+  /* ── 장기 계획 ── */
+  .plan-mark { font-size: 9px; margin-left: 1px; }
+  .row-plans { margin-top: 16px; }
+  .plans-panel { padding-bottom: 8px; }
+  .plan-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; padding: 0 16px 12px; }
+  .plan-card { border: 2px solid var(--line); border-left-width: 5px; border-radius: 12px; background: #fff; padding: 12px; }
+  .plan-top { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+  .plan-title { font-size: 13px; font-weight: 700; flex: 1; word-break: break-word; }
+  .plan-dday { font-size: 11px; font-weight: 700; color: var(--accent-deep); background: var(--accent-subtle); border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+  .plan-bar { height: 8px; border-radius: 999px; background: var(--empty); overflow: hidden; }
+  .plan-bar i { display: block; height: 100%; border-radius: 999px; transition: width .25s; }
+  .plan-prog { font-size: 10px; color: var(--ink-3); margin: 4px 0 8px; }
+  .plan-steps { display: flex; flex-direction: column; gap: 5px; }
+  .pstep { display: flex; align-items: center; gap: 7px; font-size: 12px; }
+  .pstep .ck { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-strong); flex: none; display: grid; place-items: center; font-size: 10px; cursor: pointer; background: #fff; color: transparent; }
+  .pstep .ck.on { background: var(--accent); border-color: var(--accent-deep); color: #fff; }
+  .pstep-t { flex: 1; word-break: break-word; }
+  .pstep-t time { font-size: 10px; color: var(--ink-3); margin-left: 3px; }
+  .pstep.done .pstep-t { text-decoration: line-through; color: var(--ink-3); }
+  .plan-addstep { display: flex; gap: 5px; margin-top: 9px; }
+  .plan-addstep input[type="text"] { flex: 1; min-width: 0; border: 2px solid var(--line); border-radius: 8px; padding: 4px 7px; font-size: 11px; background: #fff; font-family: inherit; }
+  .plan-addstep input[type="date"] { border: 2px solid var(--line); border-radius: 8px; padding: 3px 5px; font-size: 10px; background: #fff; font-family: inherit; }
+  .dayplan { display: flex; align-items: center; gap: 8px; padding: 5px 0; }
+  .dayplan .ck { width: 20px; height: 20px; border-radius: 50%; border: 2px solid var(--line-strong); flex: none; display: grid; place-items: center; font-size: 11px; cursor: pointer; background: #fff; color: transparent; }
+  .dayplan .ck:hover { border-color: var(--accent-deep); }
+  .dp-body { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+  .dp-title { font-size: 12px; font-weight: 700; word-break: break-word; }
+  .dp-title time { font-size: 10px; font-weight: 700; color: var(--accent-deep); margin-left: 4px; }
+  .dp-next { font-size: 11px; color: var(--ink-2); word-break: break-word; }
